@@ -1,0 +1,12 @@
+@keyframes shift-left {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-10%);
+    }
+}
+
+.shift-chart {
+    animation: shift-left 0.5s ease-in-out;
+}

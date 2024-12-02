@@ -1,0 +1,46 @@
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-fe-plugfest
+  namespace: edge-test
+  labels:
+    app: edge-fe-plugfest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-fe-plugfest
+  template:
+    metadata:
+      labels:
+        app: edge-fe-plugfest
+    spec:
+      containers:
+        - name: edge-fe-plugfest
+          image: 44ce789b-kr1-registry.container.nhncloud.com/container-platform-registry/edge-fe-sample02:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: REACT_APP_API_BASE_URL
+              value: "http://125.6.38.146:31035"
+      imagePullSecrets:
+        - name: ncr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-fe-plugfest-service
+  namespace: edge-test
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+      nodePort: 31030
+  selector:
+    app: edge-fe-plugfest

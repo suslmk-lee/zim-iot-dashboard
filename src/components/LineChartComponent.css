@@ -1,0 +1,16 @@
+@keyframes shift-left {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+.shift-chart {
+    animation: shift-left 1.5s ease-in;
+}
+
+.chart-wrapper {
+    transition: transform 0.8s ease-in-out; /* 부드럽게 이동하도록 애니메이션 적용 */
+}
