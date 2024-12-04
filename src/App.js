@@ -44,32 +44,32 @@ const App = () => {
 
     async function fetchWithTimeout(resource, options = {}) {
         const { timeout = 2000 } = options;
-
+        
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
-
+        
         try {
-            console.log('Fetching:', resource); 
+            console.log('Fetching:', resource);
             const response = await fetch(resource, {
                 ...options,
                 mode: 'cors',
-                credentials: 'include', 
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    ...options.headers
+                    'Accept': 'application/json'
                 },
                 signal: controller.signal
             });
             clearTimeout(id);
             
-            console.log('Response status:', response.status);
-            console.log('Response headers:', [...response.headers.entries()]);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             
             return response;
         } catch (error) {
             clearTimeout(id);
-            console.error('Fetch error:', error); 
+            console.error('Fetch error:', error);
             throw error;
         }
     }
