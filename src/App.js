@@ -48,13 +48,24 @@ const App = () => {
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
 
-        const response = await fetch(resource, {
-            ...options,
-            signal: controller.signal
-        });
-        clearTimeout(id);
-
-        return response;
+        try {
+            const response = await fetch(resource, {
+                ...options,
+                mode: 'cors',
+                credentials: 'omit',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...options.headers
+                },
+                signal: controller.signal
+            });
+            clearTimeout(id);
+            return response;
+        } catch (error) {
+            clearTimeout(id);
+            throw error;
+        }
     }
 
 
