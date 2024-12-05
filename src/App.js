@@ -84,7 +84,7 @@ const App = () => {
 
         try {
             const requestTime = window.performance.now();
-            const response = await fetchWithTimeout(`${API_BASE_URL}/api/data`,{
+            const response = await fetchWithTimeout(`${API_BASE_URL}/iot-data`,{
                 signal: AbortSignal.timeout(2000)
             });
             const resposneTime = window.performance.now();
