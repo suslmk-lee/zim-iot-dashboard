@@ -84,7 +84,7 @@ const App = () => {
 
                 signal: AbortSignal.timeout(2000)
             });*/
-            const response = await fetchWithTimeout(`${API_BASE_URL}`, {
+            const response = await fetchWithTimeout(`${API_BASE_URL}/iot-data`, {
                 signal: AbortSignal.timeout(2000)
             });
 
@@ -142,7 +142,7 @@ const App = () => {
 
         try {
             const requestTime = window.performance.now();
-            const response = await fetchWithTimeout(`${API_BASE_URL}?milli-time=${maxTimestamp}`,{
+            const response = await fetchWithTimeout(`${API_BASE_URL}/iot-data?milli-time=${maxTimestamp}`,{
                 signal: AbortSignal.timeout(2000)
             });
             const resposneTime = window.performance.now();
