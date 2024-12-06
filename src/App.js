@@ -13,7 +13,7 @@ import ApexHeatmapChart from "./components/ApexHeatmapChartComponent";
 
 const App = () => {
 
-    const API_BASE_URL = 'http://zim-iot-data-api-service.iot-edge.svc.cluster.local' ;
+    const API_BASE_URL =  'http://133.186.250.55:32032';
     const chartSeries = []; // realtime chart data
     const chartData1 = [];  // line 데이터 1
     const chartData2 = [];  // line 데이터 2
