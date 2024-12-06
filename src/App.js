@@ -13,7 +13,7 @@ import ApexHeatmapChart from "./components/ApexHeatmapChartComponent";
 
 const App = () => {
 
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://zim-iot-data-api-service.iot-edge.svc/iot-data';
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ;
     const chartSeries = []; // realtime chart data
     const chartData1 = [];  // line 데이터 1
     const chartData2 = [];  // line 데이터 2
@@ -50,7 +50,7 @@ const App = () => {
         const id = setTimeout(() => controller.abort(), timeout);
 
         try {
-            //console.log('Fetching:', resource);
+            console.log('Fetching:', resource);
             const response = await fetch(resource, {
                 ...options,
                 mode: 'cors',
