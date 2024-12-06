@@ -13,7 +13,7 @@ import ApexHeatmapChart from "./components/ApexHeatmapChartComponent";
 
 const App = () => {
 
-    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ;
+    const API_BASE_URL = "http://125.6.39.164" ;
     const chartSeries = []; // realtime chart data
     const chartData1 = [];  // line 데이터 1
     const chartData2 = [];  // line 데이터 2
