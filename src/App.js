@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, Component } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useCallback, Component } from 'react';
 import './App.css';
 import ReactDOM from 'react-dom';
 import ApexCharts from "apexcharts";
@@ -13,7 +13,7 @@ import ApexHeatmapChart from "./components/ApexHeatmapChartComponent";
 
 const App = () => {
 
-    const API_BASE_URL = 'http://zim-iot-data-api-service.iot-edge.svc';
+    const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://zim-iot-data-api-service.iot-edge.svc/iot-data';
     const chartSeries = []; // realtime chart data
     const chartData1 = [];  // line 데이터 1
     const chartData2 = [];  // line 데이터 2
@@ -27,16 +27,17 @@ const App = () => {
     let TICKINTERVAL = 1000 // 1초 (1000 ms)
     let XAXISRANGE = 9000   // 차트에 보여주는 x축 범위
 
+    const [stackIoTData, setStackIoTData] = useState([]);
     const [heatmapChartSeries, setHeatmapChartSeries] = useState([]);
     let circleDataCallCount = 0;
 
     const [intervalData, updateIntervalData] = useState([1, 1, 1]);
-    useEffect(() => {
+    useLayoutEffect(() => {
         const interval = setInterval(() => {
             let array = [...intervalData, 10];
             array.shift();
             updateIntervalData(array);
-        }, 1000);
+        }, TICKINTERVAL);
         return () => {
             window.clearInterval(interval);
         };
@@ -44,12 +45,12 @@ const App = () => {
 
     async function fetchWithTimeout(resource, options = {}) {
         const { timeout = 2000 } = options;
-        
+
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
-        
+
         try {
-            console.log('Fetching:', resource);
+            //console.log('Fetching:', resource);
             const response = await fetch(resource, {
                 ...options,
                 mode: 'cors',
@@ -61,17 +62,72 @@ const App = () => {
                 signal: controller.signal
             });
             clearTimeout(id);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             return response;
         } catch (error) {
             clearTimeout(id);
             console.error('Fetch error:', error);
             throw error;
         }
+    }
+
+    async function getInitSeries(baseval) {
+        var newDate = new Date(Date.now() + offset).getTime() - XAXISRANGE ;
+        //console.log("init Timestamp - 9000ms :",newDate);
+
+        try {
+            /*const response = await fetchWithTimeout(`${API_BASE_URL}?milli-time=${newDate}`, {
+
+                signal: AbortSignal.timeout(2000)
+            });*/
+            const response = await fetchWithTimeout(`${API_BASE_URL}`, {
+                signal: AbortSignal.timeout(2000)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if(result){
+                    for (var i = 0; i < result.length; i++) {
+                        stackIoTData.push(result[i]);
+                        console.log("origin : ",result[i]);
+                    }
+
+                    /* backEnd update -> order by asc
+                    stackIoTData.sort(function(a,b) {
+                        return a.timestamp - b.timestamp
+                    });
+                    */
+                }
+            }else{
+                console.error("Failed to init data from backend. Status:", response.status);
+            }
+        } catch (error) {
+            console.error("Error init data: ", error);
+        }
+
+        console.log("getInitSeries - stackIoTData : ",stackIoTData);
+
+    }
+
+    function getMaxTimestamp () {
+        var maxArray = [];
+        var maxValue = 0;
+
+        if (stackIoTData.length > 0){
+            for (var i = 0; i < stackIoTData.length; i++) {
+                maxArray.push(stackIoTData[i].timestamp);
+            }
+        }
+
+        if(maxArray.length > 0){
+            maxValue = Math.max.apply(null, maxArray);
+        }
+
+        return maxValue;
     }
 
 
@@ -81,16 +137,29 @@ const App = () => {
         lastDate = newDate
         circleDataCallCount++;
         var modIndex = (apiTarget.length-1) - (circleDataCallCount % apiTarget.length);
+        var maxTimestamp = getMaxTimestamp();
+
 
         try {
             const requestTime = window.performance.now();
-            const response = await fetchWithTimeout(`${API_BASE_URL}/iot-data`,{
+            const response = await fetchWithTimeout(`${API_BASE_URL}?milli-time=${maxTimestamp}`,{
                 signal: AbortSignal.timeout(2000)
             });
             const resposneTime = window.performance.now();
 
+
             if (response.ok) {
                 const result = await response.json();
+
+                /* ##### stackIoTData Start ##### */
+                if(result){
+                    console.log("result",true)
+                    for (var i = 0; i < result.length; i++) {
+                        stackIoTData.push(result[i]);
+                    }
+                }
+                /* ##### stackIoTData End ##### */
+
                 /* ##### realtime chart Start ##### */
                 // IMPORTANT :: we reset the x and y of the data which is out of drawing area, to prevent memory leaks
                 for (var i = 0; i < chartData1.length - 10; i++) {
@@ -111,36 +180,36 @@ const App = () => {
 
                 switch (selectedCategory){
                     case category[0] :
-                        chartData1.push({ x: newDate, y: Math.floor(result.Status.Pmax) });
-                        chartData2.push({ x: newDate, y: Math.floor(result.Status.Pac) });
-                        chartData3.push({ x: newDate, y: Math.floor(result.Status.Sac) });
+                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].pmax) });
+                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].pac) });
+                        chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].sac) });
 
                         chartSeries.push({ name: 'Pmax', data: chartData1 });
                         chartSeries.push({ name: 'Pac', data: chartData2 });
                         chartSeries.push({ name: 'Sac', data: chartData3 });
                         break;
                     case category[1] :
-                        chartData1.push({ x: newDate, y: Math.floor(result.Status.Uab) });
-                        chartData2.push({ x: newDate, y: Math.floor(result.Status.Ubc) });
+                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].uab) });
+                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ubc) });
                         //chartData2.push({ x: newDate, y: 0 });
-                        chartData3.push({ x: newDate, y: Math.floor(result.Status.Uca) });
+                        chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].uca) });
 
                         chartSeries.push({ name: 'Uab', data: chartData1 });
                         chartSeries.push({ name: 'Ubc', data: chartData2 });
                         chartSeries.push({ name: 'Uca', data: chartData3 });
                         break;
                     case category[2] :
-                        chartData1.push({ x: newDate, y: Math.floor(result.Status.Ia) });
-                        chartData2.push({ x: newDate, y: Math.floor(result.Status.Ib) });
-                        chartData3.push({ x: newDate, y: Math.floor(result.Status.Ic) });
+                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].ia) });
+                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ib) });
+                        chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].ic) });
 
                         chartSeries.push({ name: 'Ia', data: chartData1 });
                         chartSeries.push({ name: 'Ib', data: chartData2 });
                         chartSeries.push({ name: 'Ic', data: chartData3 });
                         break;
                     case category[3] :
-                        chartData1.push({ x: newDate, y: Math.floor(result.Status.Tmod) });
-                        chartData2.push({ x: newDate, y: Math.floor(result.Status.Tamb) });
+                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].tmod) });
+                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].tamb) });
                         //chartData3.push({ x: newDate, y: Math.floor(result.Status.Sac) });
 
                         chartSeries.push({ name: 'Tmod', data: chartData1 });
@@ -149,6 +218,11 @@ const App = () => {
                         break;
                 }
                 /* ##### realtime chart End ##### */
+
+                if(stackIoTData.length > 1){
+                    stackIoTData.shift();
+                }
+                console.log("stackIoTData.slice : ",stackIoTData);
 
             }else{
                 console.error("Failed to fetch data from backend. Status:", response.status);
@@ -283,7 +357,7 @@ const App = () => {
                                 delay: 150
                             },
                             dynamicAnimation: {
-                                speed: 1000
+                                speed: TICKINTERVAL
                             }
                         },
                         toolbar: {
@@ -319,17 +393,16 @@ const App = () => {
                 selectedButton: category[0]
 
             };
-
-
-
         }
 
         componentDidMount() {
+            getInitSeries(lastDate);
+
             window.setInterval(() => {
                 getNewSeries(lastDate);
                 ApexCharts.exec('realtime', 'updateSeries', chartSeries)
 
-            }, 1000)
+            }, TICKINTERVAL)
         }
 
         changeLabel = () => {
@@ -422,15 +495,15 @@ const App = () => {
         }
     }
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         //realtime chart render
         ReactDOM.render(React.createElement(ApexChart), document.querySelector('#apexchartDom'));
     }, []);
 
     return (
         <div className="main-container">
-        <h1 className="title">K-PaaS Real-Time IoT Data</h1>
-        <div className="table-container" id="apexchartDom" />
+            <h1 className="title">K-PaaS Real-Time IoT Data</h1>
+            <div className="table-container" id="apexchartDom" />
 
             {/* 하단 - 5초 단위 그래프 및 테이블 */}
             <div className="table-container" id="chartButtom" style={{display: 'none'}}>

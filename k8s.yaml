@@ -25,7 +25,7 @@ spec:
             - containerPort: 80
           env:
             - name: REACT_APP_API_BASE_URL
-              value: "http://zim-iot-data-api-service.iot-edge.svc"
+              value: "http://zim-iot-data-api-service.iot-edge.svc/iot-data"
       imagePullSecrets:
         - name: ncr
 ---
