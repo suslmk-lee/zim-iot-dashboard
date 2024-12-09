@@ -51,7 +51,7 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
         const id = setTimeout(() => controller.abort(), timeout);
 
         try {
-            console.log('Fetching:', resource);
+            //console.log('Fetching:', resource);
             const response = await fetch(resource, {
                 ...options,
                 mode: 'cors',
@@ -141,10 +141,17 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
         var maxTimestamp = getMaxTimestamp();
 
 
+
         try {
+            // test module start
+            var targetURL = `${API_BASE_URL}/iot-data?milli-time=${maxTimestamp}`;
+            if(modIndex === 1 && (circleDataCallCount > 20 && circleDataCallCount < 41 )) targetURL = `${API_BASE_URL}/iot-data-test?milli-time=${maxTimestamp}`
+            // test module end
+
+
             const requestTime = window.performance.now();
-            const response = await fetchWithTimeout(`${API_BASE_URL}/iot-data?milli-time=${maxTimestamp}`,{
-                signal: AbortSignal.timeout(2000)
+            const response = await fetchWithTimeout(`${targetURL}`,{
+                signal: AbortSignal.timeout(1000)
             });
             const resposneTime = window.performance.now();
 
@@ -154,7 +161,7 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
 
                 /* ##### stackIoTData Start ##### */
                 if(result){
-                    console.log("result",true)
+                    //console.log("result",true)
                     for (var i = 0; i < result.length; i++) {
                         stackIoTData.push(result[i]);
                     }
