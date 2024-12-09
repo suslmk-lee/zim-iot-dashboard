@@ -45,7 +45,7 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
     }, [intervalData]);
 
     async function fetchWithTimeout(resource, options = {}) {
-        const { timeout = 2000 } = options;
+        const { timeout = 1000 } = options;
 
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
@@ -86,7 +86,7 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
                 signal: AbortSignal.timeout(2000)
             });*/
             const response = await fetchWithTimeout(`${API_BASE_URL}/iot-data`, {
-                signal: AbortSignal.timeout(2000)
+                signal: AbortSignal.timeout(1000)
             });
 
             if (response.ok) {

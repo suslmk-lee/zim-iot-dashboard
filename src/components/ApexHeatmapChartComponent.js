@@ -1,13 +1,14 @@
 import ReactApexCircleChart from "react-apexcharts";
-import React, {useEffect, useState} from "react";
+import React, {useEffect,useLayoutEffect, useState} from "react";
+import ApexCharts from "apexcharts";
 
-function ApexHeatmapChart(props) {
+const ApexHeatmapChart = React.memo(function ApexHeatmapChart(props) {
 
     const apiTarget = ['CSP-1', 'CSP-2'];
     const [heatmapChartData1, setHeatmapChartData1] = useState([]);
     const [heatmapChartData2, setHeatmapChartData2] = useState([]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         //console.log(props.data);
 
         if(props.data?.filter((item) => item.target === apiTarget[0]).length < 20){
@@ -33,6 +34,7 @@ function ApexHeatmapChart(props) {
         }else{
             setHeatmapChartData2(props.data?.filter((item) => item.target === apiTarget[1]).slice(-59));
         }
+        //ApexCharts.exec('heatmap', 'updateSeries', series)
 
     }, [props.data]);
 
@@ -89,11 +91,11 @@ function ApexHeatmapChart(props) {
                 useFillColorAsStroke: false,
                 colorScale: {
                     ranges: [{
-                            name: '응답속도(ms)',
-                            from: 0,
-                            to: 0,
-                            color: '#FFFFFF'
-                        },
+                        name: '응답속도(ms)',
+                        from: 0,
+                        to: 0,
+                        color: '#FFFFFF'
+                    },
                         {
                             name: 'Fast',
                             from: 1,
@@ -137,11 +139,11 @@ function ApexHeatmapChart(props) {
         },
         legend: {
             show: false,
+            position: 'bottom'
         }
-        /*title: {
-            text: 'HeatMap Chart (Single color)'
-        },*/
+
     }
+
 
     const options2 = {
         chart: {
@@ -217,9 +219,6 @@ function ApexHeatmapChart(props) {
             show: true,
             position: 'bottom'
         }
-        /*title: {
-            text: 'HeatMap Chart (Single color)'
-        },*/
     }
 
 
@@ -242,6 +241,6 @@ function ApexHeatmapChart(props) {
                 height="140px" />
         </div>
     );
-}
+})
 
 export default React.memo(ApexHeatmapChart);
