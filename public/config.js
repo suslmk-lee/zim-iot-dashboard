@@ -1,0 +1,1 @@
+window.REACT_APP_API_BASE_URL= "http://zim-iot-data-api-service.iot-edge"
