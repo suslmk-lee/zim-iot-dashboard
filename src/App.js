@@ -51,7 +51,7 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
         const id = setTimeout(() => controller.abort(), timeout);
 
         try {
-            console.log('Fetching:', resource);
+            //console.log('Fetching:', resource);
             const response = await fetch(resource, {
                 ...options,
                 mode: 'cors',
@@ -141,10 +141,12 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
         var maxTimestamp = getMaxTimestamp();
 
 
+
         try {
+
             const requestTime = window.performance.now();
             const response = await fetchWithTimeout(`${API_BASE_URL}/iot-data?milli-time=${maxTimestamp}`,{
-                signal: AbortSignal.timeout(2000)
+                signal: AbortSignal.timeout(1000)
             });
             const resposneTime = window.performance.now();
 
@@ -154,121 +156,81 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
 
                 /* ##### stackIoTData Start ##### */
                 if(result){
-                    console.log("result",true)
+                    //console.log("result",true)
                     for (var i = 0; i < result.length; i++) {
                         stackIoTData.push(result[i]);
                     }
                 }
                 /* ##### stackIoTData End ##### */
-
-                /* ##### realtime chart Start ##### */
-                // IMPORTANT :: we reset the x and y of the data which is out of drawing area, to prevent memory leaks
-                for (var i = 0; i < chartData1.length - 10; i++) {
-                    chartData1[i].x = newDate - XAXISRANGE - TICKINTERVAL
-                    chartData1[i].y = 0
-                }
-                for (var i = 0; i < chartData2.length - 10; i++) {
-                    chartData2[i].x = newDate - XAXISRANGE - TICKINTERVAL
-                    chartData2[i].y = 0
-                }
-                for (var i = 0; i < chartData3.length - 10; i++) {
-                    chartData3[i].x = newDate - XAXISRANGE - TICKINTERVAL
-                    chartData3[i].y = 0
-                }
-                //Series 데이터 초기화 (realtime)
-                while(chartSeries.length) chartSeries.pop();
-
-
-                switch (selectedCategory){
-                    case category[0] :
-                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].pmax) });
-                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].pac) });
-                        chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].sac) });
-
-                        chartSeries.push({ name: 'Pmax', data: chartData1 });
-                        chartSeries.push({ name: 'Pac', data: chartData2 });
-                        chartSeries.push({ name: 'Sac', data: chartData3 });
-                        break;
-                    case category[1] :
-                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].uab) });
-                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ubc) });
-                        //chartData2.push({ x: newDate, y: 0 });
-                        chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].uca) });
-
-                        chartSeries.push({ name: 'Uab', data: chartData1 });
-                        chartSeries.push({ name: 'Ubc', data: chartData2 });
-                        chartSeries.push({ name: 'Uca', data: chartData3 });
-                        break;
-                    case category[2] :
-                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].ia) });
-                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ib) });
-                        chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].ic) });
-
-                        chartSeries.push({ name: 'Ia', data: chartData1 });
-                        chartSeries.push({ name: 'Ib', data: chartData2 });
-                        chartSeries.push({ name: 'Ic', data: chartData3 });
-                        break;
-                    case category[3] :
-                        chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].tmod) });
-                        chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].tamb) });
-                        //chartData3.push({ x: newDate, y: Math.floor(result.Status.Sac) });
-
-                        chartSeries.push({ name: 'Tmod', data: chartData1 });
-                        chartSeries.push({ name: 'Tamb', data: chartData2 });
-                        //chartSeries.push({ name: 'Sac', data: chartData3 });
-                        break;
-                }
-                /* ##### realtime chart End ##### */
-
-                if(stackIoTData.length > 1){
-                    stackIoTData.shift();
-                }
-                console.log("stackIoTData.slice : ",stackIoTData);
-
-            }else{
-                console.error("Failed to fetch data from backend. Status:", response.status);
-
-                //Series 데이터 초기화 (realtime)
-                while(chartSeries.length) chartSeries.pop();
-
-                switch (selectedCategory){
-                    case category[0] :
-                        chartData1.push({ x: newDate, y: 0 });
-                        chartData2.push({ x: newDate, y: 0 });
-                        chartData3.push({ x: newDate, y: 0 });
-
-                        chartSeries.push({ name: 'Pmax', data: chartData1 });
-                        chartSeries.push({ name: 'Pac', data: chartData2 });
-                        chartSeries.push({ name: 'Sac', data: chartData3 });
-                        break;
-                    case category[1] :
-                        chartData1.push({ x: newDate, y: 0 });
-                        chartData2.push({ x: newDate, y: 0 });
-                        chartData3.push({ x: newDate, y: 0 });
-
-                        chartSeries.push({ name: 'Uab', data: chartData1 });
-                        chartSeries.push({ name: 'Ubc', data: chartData2 });
-                        chartSeries.push({ name: 'Uca', data: chartData3 });
-                        break;
-                    case category[2] :
-                        chartData1.push({ x: newDate, y: 0 });
-                        chartData2.push({ x: newDate, y: 0 });
-                        chartData3.push({ x: newDate, y: 0 });
-
-                        chartSeries.push({ name: 'Ia', data: chartData1 });
-                        chartSeries.push({ name: 'Ib', data: chartData2 });
-                        chartSeries.push({ name: 'Ic', data: chartData3 });
-                        break;
-                    case category[3] :
-                        chartData1.push({ x: newDate, y: 0 });
-                        chartData2.push({ x: newDate, y: 0 });
-
-                        chartSeries.push({ name: 'Tmod', data: chartData1 });
-                        chartSeries.push({ name: 'Tamb', data: chartData2 });
-                        break;
-                }
-
             }
+
+            /* ##### realtime chart Start ##### */
+            /* 로직변경 : 통신 실패여부와 관계없이 실시간 차트는 스택된 데이터를 표출 */
+            // IMPORTANT :: we reset the x and y of the data which is out of drawing area, to prevent memory leaks
+            for (var i = 0; i < chartData1.length - 10; i++) {
+                chartData1[i].x = newDate - XAXISRANGE - TICKINTERVAL
+                chartData1[i].y = 0
+            }
+            for (var i = 0; i < chartData2.length - 10; i++) {
+                chartData2[i].x = newDate - XAXISRANGE - TICKINTERVAL
+                chartData2[i].y = 0
+            }
+            for (var i = 0; i < chartData3.length - 10; i++) {
+                chartData3[i].x = newDate - XAXISRANGE - TICKINTERVAL
+                chartData3[i].y = 0
+            }
+            //Series 데이터 초기화 (realtime)
+            while(chartSeries.length) chartSeries.pop();
+
+
+            switch (selectedCategory){
+                case category[0] :
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].pmax) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].pac) });
+                    chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].sac) });
+
+                    chartSeries.push({ name: 'Pmax', data: chartData1 });
+                    chartSeries.push({ name: 'Pac', data: chartData2 });
+                    chartSeries.push({ name: 'Sac', data: chartData3 });
+                    break;
+                case category[1] :
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].uab) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ubc) });
+                    //chartData2.push({ x: newDate, y: 0 });
+                    chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].uca) });
+
+                    chartSeries.push({ name: 'Uab', data: chartData1 });
+                    chartSeries.push({ name: 'Ubc', data: chartData2 });
+                    chartSeries.push({ name: 'Uca', data: chartData3 });
+                    break;
+                case category[2] :
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].ia) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ib) });
+                    chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].ic) });
+
+                    chartSeries.push({ name: 'Ia', data: chartData1 });
+                    chartSeries.push({ name: 'Ib', data: chartData2 });
+                    chartSeries.push({ name: 'Ic', data: chartData3 });
+                    break;
+                case category[3] :
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].tmod) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].tamb) });
+                    //chartData3.push({ x: newDate, y: Math.floor(result.Status.Sac) });
+
+                    chartSeries.push({ name: 'Tmod', data: chartData1 });
+                    chartSeries.push({ name: 'Tamb', data: chartData2 });
+                    //chartSeries.push({ name: 'Sac', data: chartData3 });
+                    break;
+            }
+            /* ##### realtime chart End ##### */
+
+            /* ##### stackIoTData clear Start ##### */
+            if(stackIoTData.length > 1){
+                stackIoTData.shift();
+            }
+            console.log("stackIoTData.slice : ",stackIoTData);
+            /* ##### stackIoTData clear Start ##### */
+
 
             /* ##### heatmap chart Start ##### */
             let heatmapData = {
@@ -284,45 +246,73 @@ const API_BASE_URL = Config.REACT_APP_API_BASE_URL ;
         } catch (error) {
             console.error("Error fetching data: ", error);
 
+            /* ##### realtime chart Start ##### */
+            /* 로직변경 : 통신 실패여부와 관계없이 실시간 차트는 스택된 데이터를 표출 */
+            // IMPORTANT :: we reset the x and y of the data which is out of drawing area, to prevent memory leaks
+            for (var i = 0; i < chartData1.length - 10; i++) {
+                chartData1[i].x = newDate - XAXISRANGE - TICKINTERVAL
+                chartData1[i].y = 0
+            }
+            for (var i = 0; i < chartData2.length - 10; i++) {
+                chartData2[i].x = newDate - XAXISRANGE - TICKINTERVAL
+                chartData2[i].y = 0
+            }
+            for (var i = 0; i < chartData3.length - 10; i++) {
+                chartData3[i].x = newDate - XAXISRANGE - TICKINTERVAL
+                chartData3[i].y = 0
+            }
             //Series 데이터 초기화 (realtime)
             while(chartSeries.length) chartSeries.pop();
 
+
             switch (selectedCategory){
                 case category[0] :
-                    chartData1.push({ x: newDate, y: 0 });
-                    chartData2.push({ x: newDate, y: 0 });
-                    chartData3.push({ x: newDate, y: 0 });
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].pmax) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].pac) });
+                    chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].sac) });
 
                     chartSeries.push({ name: 'Pmax', data: chartData1 });
                     chartSeries.push({ name: 'Pac', data: chartData2 });
                     chartSeries.push({ name: 'Sac', data: chartData3 });
                     break;
                 case category[1] :
-                    chartData1.push({ x: newDate, y: 0 });
-                    chartData2.push({ x: newDate, y: 0 });
-                    chartData3.push({ x: newDate, y: 0 });
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].uab) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ubc) });
+                    //chartData2.push({ x: newDate, y: 0 });
+                    chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].uca) });
 
                     chartSeries.push({ name: 'Uab', data: chartData1 });
                     chartSeries.push({ name: 'Ubc', data: chartData2 });
                     chartSeries.push({ name: 'Uca', data: chartData3 });
                     break;
                 case category[2] :
-                    chartData1.push({ x: newDate, y: 0 });
-                    chartData2.push({ x: newDate, y: 0 });
-                    chartData3.push({ x: newDate, y: 0 });
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].ia) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].ib) });
+                    chartData3.push({ x: newDate, y: Math.floor(stackIoTData[0].ic) });
 
                     chartSeries.push({ name: 'Ia', data: chartData1 });
                     chartSeries.push({ name: 'Ib', data: chartData2 });
                     chartSeries.push({ name: 'Ic', data: chartData3 });
                     break;
                 case category[3] :
-                    chartData1.push({ x: newDate, y: 0 });
-                    chartData2.push({ x: newDate, y: 0 });
+                    chartData1.push({ x: newDate, y: Math.floor(stackIoTData[0].tmod) });
+                    chartData2.push({ x: newDate, y: Math.floor(stackIoTData[0].tamb) });
+                    //chartData3.push({ x: newDate, y: Math.floor(result.Status.Sac) });
 
                     chartSeries.push({ name: 'Tmod', data: chartData1 });
                     chartSeries.push({ name: 'Tamb', data: chartData2 });
+                    //chartSeries.push({ name: 'Sac', data: chartData3 });
                     break;
             }
+            /* ##### realtime chart End ##### */
+
+            /* ##### stackIoTData clear Start ##### */
+            if(stackIoTData.length > 1){
+                stackIoTData.shift();
+            }
+            console.log("stackIoTData.slice : ",stackIoTData);
+            /* ##### stackIoTData clear Start ##### */
+
 
             /* ##### heatmap chart Start ##### */
             let heatmapData = {

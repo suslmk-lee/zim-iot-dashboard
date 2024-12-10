@@ -1,11 +1,11 @@
 import ReactApexCircleChart from "react-apexcharts";
-import React, {useEffect, useState} from "react";
+import React, {useEffect,useLayoutEffect, useState} from "react";
 
-function ApexCircleChart(props) {
+const ApexCircleChart = React.memo(function ApexCircleChart(props) {
 
     const apiTarget = ['CSP-1', 'CSP-2'];
     const [circleChartSeries, setCircleChartSeries] = useState([100, 0, 0, 0, 0]);
-    useEffect(() => {
+    useLayoutEffect(() => {
         let totalCnt = props.data.length;
         let csp1SuccessCnt = props.data?.filter((item) => item.target === apiTarget[0] && item.status).length;
         let csp1FailCnt = props.data?.filter((item) => item.target === apiTarget[0] && !item.status).length;
@@ -128,6 +128,6 @@ function ApexCircleChart(props) {
             </div>*/}
         </div>
     );
-}
+})
 
 export default React.memo(ApexCircleChart);
